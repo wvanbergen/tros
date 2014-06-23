@@ -16,7 +16,7 @@
 
 require 'test_helper'
 
-class TestSocketTransport < Minitest::Test
+class SocketTransportTest < Minitest::Test
   def test_buffer_writing
     io = StringIO.new
     st = Tros::IPC::SocketTransport.new(io)

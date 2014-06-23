@@ -16,8 +16,8 @@
 
 require 'test_helper'
 
-class TestIO < Minitest::Test
-  DATAFILE = 'tmp/test.rb.avro'
+class IOTest < Minitest::Test
+  DATAFILE = File.expand_path('../tmp/test.rb.avro', File.dirname(__FILE__))
   Schema = Tros::Schema
 
   def test_null

@@ -16,7 +16,7 @@
 
 require 'test_helper'
 
-class TestProtocol < Minitest::Test
+class ProtocolTest < Minitest::Test
 
   class ExampleProtocol
     attr_reader :protocol_string, :valid, :name

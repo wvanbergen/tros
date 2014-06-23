@@ -17,7 +17,7 @@
 
 require 'test_helper'
 
-class TestDataFile < Minitest::Test
+class DataFileTest < Minitest::Test
   HERE = File.expand_path File.dirname(__FILE__)
   def setup
     if File.exists?(HERE + '/data.avr')
