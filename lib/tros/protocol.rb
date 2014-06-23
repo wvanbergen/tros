@@ -104,7 +104,7 @@ module Tros
       hsh['types'] = types.map{|t| t.to_avro(names) } if types
 
       if messages
-        hsh['messages'] = messages.collect_hash{|k,t| [k, t.to_avro(names)] }
+        hsh['messages'] = messages.inject({}) { |carry, (k,t)| carry[k] = t.to_avro(names); carry }
       end
 
       hsh

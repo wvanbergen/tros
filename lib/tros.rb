@@ -32,7 +32,6 @@ module Tros
   end
 end
 
-require 'tros/collect_hash'
 require 'tros/schema'
 require 'tros/io'
 require 'tros/data_file'
