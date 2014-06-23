@@ -9,5 +9,5 @@ rvm:
   - rbx-2.2.6
 matrix:
   allow_failures:
-    - rvm: rbx
+    - rvm: rbx-2.2.6
     - rvm: ruby-head
