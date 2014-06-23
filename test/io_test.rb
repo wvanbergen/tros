@@ -336,7 +336,7 @@ EOS
 
      # test that the round-trip didn't mess up anything
     # NB: I don't think we should do this. Why enforce ordering?
-    assert_equal JSON.load(str), JSON.load(parsed_string)
+    assert_equal JSON.parse("[#{str}]").first.to_json, parsed_string
 
     # test __eq__
     assert_equal schema, Tros::Schema.parse(str)

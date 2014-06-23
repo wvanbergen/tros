@@ -33,7 +33,7 @@ module Tros
     LONG_MAX_VALUE = (1 << 63) - 1
 
     def self.parse(json_string)
-      real_parse(JSON.load(json_string), {})
+      real_parse(JSON.load("[#{json_string}]").first, {})
     end
 
     # Build Tros Schema from data parsed out of JSON string.
@@ -165,7 +165,7 @@ module Tros
     end
 
     def to_s
-      JSON.dump(to_avro)
+      to_avro.to_json
     end
 
     class NamedSchema < Schema
