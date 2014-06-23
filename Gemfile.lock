@@ -1,0 +1,18 @@
+PATH
+  remote: .
+  specs:
+    tros (1.7.6.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.0.6)
+    rake (10.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  minitest (~> 5)
+  rake
+  tros!
