@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    tros (1.7.6.1)
+    tros (1.7.6.2)
 
 GEM
   remote: https://rubygems.org/
