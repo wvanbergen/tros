@@ -15,8 +15,12 @@
 # limitations under the License.
 
 require "minitest/autorun"
-
 require "stringio"
-require "fileutils"
+
+TEST_DIR = File.expand_path('..', __FILE__)
+ROOT_DIR = File.expand_path('..', TEST_DIR)
+TMP_DIR  = File.join(ROOT_DIR, 'tmp')
+Dir.mkdir(TMP_DIR) unless File.exist?(TMP_DIR)
+
 require "tros"
 require "helpers/random_data"

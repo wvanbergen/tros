@@ -18,17 +18,14 @@
 require 'test_helper'
 
 class DataFileTest < Minitest::Test
-  HERE = File.expand_path File.dirname(__FILE__)
+  TEST_FILE = File.join(TMP_DIR, 'data_file_test.avro')
+  
   def setup
-    if File.exists?(HERE + '/data.avr')
-      File.unlink(HERE + '/data.avr')
-    end
+    File.unlink(TEST_FILE) if File.exists?(TEST_FILE)
   end
 
   def teardown
-    if File.exists?(HERE + '/data.avr')
-      File.unlink(HERE + '/data.avr')
-    end
+    File.unlink(TEST_FILE) if File.exists?(TEST_FILE)
   end
 
   def test_differing_schemas_with_primitives
@@ -47,7 +44,7 @@ class DataFileTest < Minitest::Test
     data = [{"username" => "john", "age" => 25, "verified" => true},
             {"username" => "ryan", "age" => 23, "verified" => false}]
 
-    Tros::DataFile.open('data.avr', 'w', writer_schema) do |dw|
+    Tros::DataFile.open(TEST_FILE, 'w', writer_schema) do |dw|
       data.each{|h| dw << h }
     end
 
@@ -62,7 +59,7 @@ class DataFileTest < Minitest::Test
       }
     JSON
 
-    Tros::DataFile.open('data.avr', 'r', reader_schema) do |dr|
+    Tros::DataFile.open(TEST_FILE, 'r', reader_schema) do |dr|
       dr.each_with_index do |record, i|
         assert_equal data[i]['username'], record['username']
       end
@@ -109,14 +106,14 @@ class DataFileTest < Minitest::Test
               "something_error" => {"code" => 401}
             }]
 
-    Tros::DataFile.open('data.avr', 'w', writer_schema) do |dw|
+    Tros::DataFile.open(TEST_FILE, 'w', writer_schema) do |dw|
       data.each{|d| dw << d }
     end
 
     %w[fixed enum record error array map union].each do |s|
       reader = JSON.load(writer_schema)
       reader['fields'] = reader['fields'].reject{|f| f['type']['type'] == s}
-      Tros::DataFile.open('data.avr', 'r', JSON.dump(reader)) do |dr|
+      Tros::DataFile.open(TEST_FILE, 'r', JSON.dump(reader)) do |dr|
         dr.each_with_index do |obj, i|
           reader['fields'].each do |field|
             assert_equal data[i][field['name']], obj[field['name']]
@@ -139,7 +136,7 @@ class DataFileTest < Minitest::Test
 
     data = {"something_boolean" => true }
 
-    Tros::DataFile.open('data.avr', 'w', writer_schema) do |dw|
+    Tros::DataFile.open(TEST_FILE, 'w', writer_schema) do |dw|
       while dw.writer.tell < Tros::DataFile::SYNC_INTERVAL
         dw << data
       end
@@ -151,11 +148,11 @@ class DataFileTest < Minitest::Test
   end
 
   def test_utf8
-    datafile = Tros::DataFile.open('data.avr', 'w', '"string"')
+    datafile = Tros::DataFile.open(TEST_FILE, 'w', '"string"')
     datafile << "家"
     datafile.close
 
-    datafile = Tros::DataFile.open('data.avr')
+    datafile = Tros::DataFile.open(TEST_FILE)
     datafile.each do |s|
       assert_equal "家", s
     end
@@ -163,13 +160,13 @@ class DataFileTest < Minitest::Test
   end
 
   def test_deflate
-    Tros::DataFile.open('data.avr', 'w', '"string"', :deflate) do |writer|
+    Tros::DataFile.open(TEST_FILE, 'w', '"string"', :deflate) do |writer|
       writer << 'a' * 10_000
     end
-    assert(File.size('data.avr') < 500)
+    assert(File.size(TEST_FILE) < 500)
 
     records = []
-    Tros::DataFile.open('data.avr') do |reader|
+    Tros::DataFile.open(TEST_FILE) do |reader|
       reader.each { |record| records << record }
     end
     assert_equal records, ['a' * 10_000]
@@ -178,17 +175,17 @@ class DataFileTest < Minitest::Test
   def test_append_to_deflated_file
     schema = Tros::Schema.parse('"string"')
     writer = Tros::IO::DatumWriter.new(schema)
-    file = Tros::DataFile::Writer.new(File.open('data.avr', 'wb'), writer, schema, :deflate)
+    file = Tros::DataFile::Writer.new(File.open(TEST_FILE, 'wb'), writer, schema, :deflate)
     file << 'a' * 10_000
     file.close
 
-    file = Tros::DataFile::Writer.new(File.open('data.avr', 'a+b'), writer)
+    file = Tros::DataFile::Writer.new(File.open(TEST_FILE, 'a+b'), writer)
     file << 'b' * 10_000
     file.close
-    assert(File.size('data.avr') < 1_000)
+    assert(File.size(TEST_FILE) < 1_000)
 
     records = []
-    Tros::DataFile.open('data.avr') do |reader|
+    Tros::DataFile.open(TEST_FILE) do |reader|
       reader.each {|record| records << record }
     end
     assert_equal records, ['a' * 10_000, 'b' * 10_000]

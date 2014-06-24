@@ -17,8 +17,7 @@
 require 'test_helper'
 
 class IOTest < Minitest::Test
-  DATAFILE = File.expand_path('../tmp/test.rb.avro', File.dirname(__FILE__))
-  Schema = Tros::Schema
+  DATAFILE = File.join(TMP_DIR, 'io_test.avro')
 
   def test_null
     check_default('"null"', "null", nil)
