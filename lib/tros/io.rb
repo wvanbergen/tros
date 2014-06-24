@@ -205,7 +205,7 @@ module Tros
       # A string is encoded as a long followed by that many bytes of
       # UTF-8 encoded character data
       def write_string(datum)
-        write_bytes(datum.encode('UTF-8'))
+        write_bytes(datum.encode('UTF-8').force_encoding('binary'))
       end
 
       # Write an arbritary datum.
