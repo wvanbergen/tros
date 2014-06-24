@@ -1,4 +1,4 @@
-# Tros
+# Tros [![Build Status](https://travis-ci.org/wvanbergen/tros.svg?branch=master)](https://travis-ci.org/wvanbergen/tros)
 
 This is a cleanup fork of the Avro gem.
 
