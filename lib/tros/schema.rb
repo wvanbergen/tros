@@ -93,6 +93,17 @@ module Tros
 
     # Determine if a ruby datum is an instance of a schema
     def self.validate(expected_schema, datum)
+      return true if validate_strictly(expected_schema, datum)
+      case expected_schema.type_sym
+      when :float, :double
+        datum.is_a?(Float) || datum.is_a?(Fixnum) || datum.is_a?(Bignum)
+      else
+        return false
+      end
+    end
+
+    # Determine if a ruby datum is an instance of a schema
+    def self.validate_strictly(expected_schema, datum)
       case expected_schema.type_sym
       when :null
         datum.nil?
@@ -107,24 +118,24 @@ module Tros
         (datum.is_a?(Fixnum) || datum.is_a?(Bignum)) &&
             (LONG_MIN_VALUE <= datum) && (datum <= LONG_MAX_VALUE)
       when :float, :double
-        datum.is_a?(Float) || datum.is_a?(Fixnum) || datum.is_a?(Bignum)
+        datum.is_a?(Float)
       when :fixed
         datum.is_a?(String) && datum.size == expected_schema.size
       when :enum
         expected_schema.symbols.include? datum
       when :array
         datum.is_a?(Array) &&
-          datum.all?{|d| validate(expected_schema.items, d) }
+          datum.all?{|d| validate_strictly(expected_schema.items, d) }
       when :map
           datum.keys.all?{|k| k.is_a? String } &&
-          datum.values.all?{|v| validate(expected_schema.values, v) }
+          datum.values.all?{|v| validate_strictly(expected_schema.values, v) }
       when :union
-        expected_schema.schemas.any?{|s| validate(s, datum) }
+        expected_schema.schemas.any?{|s| validate_strictly(s, datum) }
       when :record, :error, :request
         datum.is_a?(Hash) &&
-          expected_schema.fields.all?{|f| validate(f.type, datum[f.name]) }
+          expected_schema.fields.all?{|f| validate_strictly(f.type, datum[f.name]) }
       else
-        raise "you suck #{expected_schema.inspect} is not allowed."
+        raise TypeError, "#{expected_schema.inspect} is not recognized as type."
       end
     end
 

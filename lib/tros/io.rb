@@ -535,7 +535,7 @@ module Tros
 
       def write_data(writers_schema, datum, encoder)
         unless Schema.validate(writers_schema, datum)
-          raise TrosTypeError.new(writers_schema, datum)
+          raise AvroTypeError.new(writers_schema, datum)
         end
 
         # function dispatch to write datum
@@ -590,14 +590,12 @@ module Tros
       end
 
       def write_union(writers_schema, datum, encoder)
-        index_of_schema = -1
-        found = writers_schema.schemas.
-          find{|e| index_of_schema += 1; found = Schema.validate(e, datum) }
-        unless found  # Because find_index doesn't exist in 1.8.6
-          raise TrosTypeError.new(writers_schema, datum)
-        end
-        encoder.write_long(index_of_schema)
-        write_data(writers_schema.schemas[index_of_schema], datum, encoder)
+        index = writers_schema.schemas.find_index { |s| Schema.validate_strictly(s, datum) }
+        index ||= writers_schema.schemas.find_index { |s| Schema.validate(s, datum) }
+        raise AvroTypeError.new(writers_schema, datum) if index.nil?
+
+        encoder.write_long(index)
+        write_data(writers_schema.schemas[index], datum, encoder)
       end
 
       def write_record(writers_schema, datum, encoder)
