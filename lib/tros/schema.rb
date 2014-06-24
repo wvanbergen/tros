@@ -333,7 +333,7 @@ module Tros
         elsif PRIMITIVE_TYPES.include?(type)
           super(type.to_sym)
         else
-          raise TrosError.new("#{type} is not a valid primitive type.")
+          raise AvroError.new("#{type} is not a valid primitive type.")
         end
       end
 
@@ -348,7 +348,7 @@ module Tros
       def initialize(name, space, size, names=nil)
         # Ensure valid cto args
         unless size.is_a?(Fixnum) || size.is_a?(Bignum)
-          raise TrosError, 'Fixed Schema requires a valid integer for size property.'
+          raise AvroError, 'Fixed Schema requires a valid integer for size property.'
         end
         super(:fixed, name, space, names)
         @size = size
@@ -379,7 +379,7 @@ module Tros
     end
   end
 
-  class SchemaParseError < TrosError; end
+  class SchemaParseError < AvroError; end
 
   module Name
     def self.extract_namespace(name, namespace)

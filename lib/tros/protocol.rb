@@ -18,7 +18,7 @@ module Tros
   class Protocol
     VALID_TYPE_SCHEMA_TYPES = Set.new(%w[enum record error fixed])
     VALID_TYPE_SCHEMA_TYPES_SYM = Set.new(VALID_TYPE_SCHEMA_TYPES.map(&:to_sym))
-    class ProtocolParseError < Tros::TrosError; end
+    class ProtocolParseError < Tros::AvroError; end
 
     attr_reader :name, :namespace, :types, :messages, :md5
     def self.parse(protocol_string)

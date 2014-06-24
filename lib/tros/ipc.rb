@@ -18,7 +18,7 @@ require "net/http"
 
 module Tros::IPC
 
-  class TrosRemoteError < Tros::TrosError; end
+  class TrosRemoteError < Tros::AvroError; end
 
   HANDSHAKE_REQUEST_SCHEMA = Tros::Schema.parse <<-JSON
   {
@@ -70,9 +70,9 @@ module Tros::IPC
   BUFFER_SIZE = 8192
 
   # Raised when an error message is sent by an Tros requestor or responder.
-  class TrosRemoteException < Tros::TrosError; end
+  class TrosRemoteException < Tros::AvroError; end
 
-  class ConnectionClosedException < Tros::TrosError; end
+  class ConnectionClosedException < Tros::AvroError; end
 
   class Requestor
     """Base class for the client side of a protocol interaction."""
@@ -149,7 +149,7 @@ module Tros::IPC
 
       message = local_protocol.messages[message_name]
       unless message
-        raise TrosError, "Unknown message: #{message_name}"
+        raise AvroError, "Unknown message: #{message_name}"
       end
       encoder.write_string(message.name)
 
@@ -170,18 +170,18 @@ module Tros::IPC
         self.send_protocol = false
         we_have_matching_schema = true
       when 'CLIENT'
-        raise TrosError.new('Handshake failure. match == CLIENT') if send_protocol
+        raise AvroError.new('Handshake failure. match == CLIENT') if send_protocol
         self.remote_protocol = Tros::Protocol.parse(handshake_response['serverProtocol'])
         self.remote_hash = handshake_response['serverHash']
         self.send_protocol = false
         we_have_matching_schema = true
       when 'NONE'
-        raise TrosError.new('Handshake failure. match == NONE') if send_protocol
+        raise AvroError.new('Handshake failure. match == NONE') if send_protocol
         self.remote_protocol = Tros::Protocol.parse(handshake_response['serverProtocol'])
         self.remote_hash = handshake_response['serverHash']
         self.send_protocol = true
       else
-        raise TrosError.new("Unexpected match: #{match}")
+        raise AvroError.new("Unexpected match: #{match}")
       end
 
       return we_have_matching_schema
@@ -199,12 +199,12 @@ module Tros::IPC
 
       # remote response schema
       remote_message_schema = remote_protocol.messages[message_name]
-      raise TrosError.new("Unknown remote message: #{message_name}") unless remote_message_schema
+      raise AvroError.new("Unknown remote message: #{message_name}") unless remote_message_schema
 
       # local response schema
       local_message_schema = local_protocol.messages[message_name]
       unless local_message_schema
-        raise TrosError.new("Unknown local message: #{message_name}")
+        raise AvroError.new("Unknown local message: #{message_name}")
       end
 
       # error flag
@@ -264,11 +264,11 @@ module Tros::IPC
         # schema resolution (one fine day)
         remote_message = remote_protocol.messages[remote_message_name]
         unless remote_message
-          raise TrosError.new("Unknown remote message: #{remote_message_name}")
+          raise AvroError.new("Unknown remote message: #{remote_message_name}")
         end
         local_message = local_protocol.messages[remote_message_name]
         unless local_message
-          raise TrosError.new("Unknown local message: #{remote_message_name}")
+          raise AvroError.new("Unknown local message: #{remote_message_name}")
         end
         writers_schema = remote_message.request
         readers_schema = local_message.request
@@ -292,7 +292,7 @@ module Tros::IPC
           writers_schema = local_message.errors || SYSTEM_ERROR_SCHEMA
           write_error(writers_schema, error, buffer_encoder)
         end
-      rescue Tros::TrosError => e
+      rescue Tros::AvroError => e
         error = TrosRemoteException.new(e.to_s)
         buffer_encoder = Tros::IO::BinaryEncoder.new(StringIO.new)
         META_WRITER.write(response_metadata, buffer_encoder)

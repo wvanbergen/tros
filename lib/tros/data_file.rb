@@ -26,7 +26,7 @@ module Tros
     META_SCHEMA = Schema.parse('{"type": "map", "values": "bytes"}')
     VALID_ENCODINGS = ['binary'] # not used yet
 
-    class DataFileError < TrosError; end
+    class DataFileError < AvroError; end
 
     def self.open(file_path, mode='r', schema=nil, codec=nil)
       schema = Tros::Schema.parse(schema) if schema

@@ -17,14 +17,14 @@
 module Tros
   module IO
     # Raised when datum is not an example of schema
-    class AvroTypeError < TrosError
+    class AvroTypeError < AvroError
       def initialize(expected_schema, datum)
         super("The datum #{datum.inspect} is not an example of schema #{expected_schema}")
       end
     end
 
     # Raised when writer's and reader's schema do not match
-    class SchemaMatchException < TrosError
+    class SchemaMatchException < AvroError
       def initialize(writers_schema, readers_schema)
         super("Writer's schema #{writers_schema} and Reader's schema " +
               "#{readers_schema} do not match.")
@@ -304,7 +304,7 @@ module Tros
         when :union;   read_union(writers_schema, readers_schema, decoder)
         when :record, :error, :request;  read_record(writers_schema, readers_schema, decoder)
         else
-          raise TrosError, "Cannot read unknown schema type: #{writers_schema.type}"
+          raise AvroError, "Cannot read unknown schema type: #{writers_schema.type}"
         end
       end
 
@@ -441,7 +441,7 @@ module Tros
           return read_record
         else
           fail_msg = "Unknown type: #{field_schema.type}"
-          raise TrosError, fail_msg
+          raise AvroError, fail_msg
         end
       end
 
@@ -476,7 +476,7 @@ module Tros
         when :record, :error, :request
           skip_record(writers_schema, decoder)
         else
-          raise TrosError, "Unknown schema type: #{writers_schema.type}"
+          raise AvroError, "Unknown schema type: #{writers_schema.type}"
         end
       end
 
@@ -555,7 +555,7 @@ module Tros
         when :union;   write_union(writers_schema, datum, encoder)
         when :record, :error, :request;  write_record(writers_schema, datum, encoder)
         else
-          raise TrosError.new("Unknown type: #{writers_schema.type}")
+          raise AvroError.new("Unknown type: #{writers_schema.type}")
         end
       end
 

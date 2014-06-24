@@ -22,9 +22,9 @@ require 'stringio'
 require 'zlib'
 
 module Tros
-  class TrosError < StandardError; end
+  class AvroError < StandardError; end
 
-  class TrosTypeError < Tros::TrosError
+  class AvroTypeError < Tros::AvroError
     def initialize(schm=nil, datum=nil, msg=nil)
       msg ||= "Not a #{schm.to_s}: #{datum}"
       super(msg)
