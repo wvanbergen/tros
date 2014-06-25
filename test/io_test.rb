@@ -172,7 +172,7 @@ EOS
     [-8193, '81 80 01'],
   ]
 
-  def tros_hexlify(reader)
+  def avro_hexlify(reader)
     bytes = []
     current_byte = reader.read(1)
     bytes << hexlify(current_byte)
@@ -196,7 +196,7 @@ EOS
       datum_writer.write(value, encoder)
 
       buffer.seek(0)
-      hex_val = tros_hexlify(buffer)
+      hex_val = avro_hexlify(buffer)
 
       assert_equal hex_encoding, hex_val
     end
@@ -211,7 +211,7 @@ EOS
 
       # read it out of the buffer and hexlify it
       buffer.seek(0)
-      hex_val = tros_hexlify(buffer)
+      hex_val = avro_hexlify(buffer)
 
       assert_equal hex_encoding, hex_val
     end

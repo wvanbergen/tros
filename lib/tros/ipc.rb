@@ -18,7 +18,7 @@ require "net/http"
 
 module Tros::IPC
 
-  class TrosRemoteError < Tros::AvroError; end
+  class AvroRemoteError < Tros::AvroError; end
 
   HANDSHAKE_REQUEST_SCHEMA = Tros::Schema.parse <<-JSON
   {
@@ -70,7 +70,7 @@ module Tros::IPC
   BUFFER_SIZE = 8192
 
   # Raised when an error message is sent by an Tros requestor or responder.
-  class TrosRemoteException < Tros::AvroError; end
+  class AvroRemoteException < Tros::AvroError; end
 
   class ConnectionClosedException < Tros::AvroError; end
 
@@ -226,7 +226,7 @@ module Tros::IPC
 
     def read_error(writers_schema, readers_schema, decoder)
       datum_reader = Tros::IO::DatumReader.new(writers_schema, readers_schema)
-      TrosRemoteError.new(datum_reader.read(decoder))
+      AvroRemoteError.new(datum_reader.read(decoder))
     end
   end
 
@@ -276,10 +276,10 @@ module Tros::IPC
         # perform server logic
         begin
           response = call(local_message, request)
-        rescue TrosRemoteError => e
+        rescue AvroRemoteError => e
           error = e
         rescue Exception => e
-          error = TrosRemoteError.new(e.to_s)
+          error = AvroRemoteError.new(e.to_s)
         end
 
         # write response using local protocol
@@ -293,7 +293,7 @@ module Tros::IPC
           write_error(writers_schema, error, buffer_encoder)
         end
       rescue Tros::AvroError => e
-        error = TrosRemoteException.new(e.to_s)
+        error = AvroRemoteException.new(e.to_s)
         buffer_encoder = Tros::IO::BinaryEncoder.new(StringIO.new)
         META_WRITER.write(response_metadata, buffer_encoder)
         buffer_encoder.write_boolean(true)
