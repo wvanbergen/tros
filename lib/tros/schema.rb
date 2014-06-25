@@ -92,18 +92,18 @@ module Tros
     end
 
     # Determine if a ruby datum is an instance of a schema
-    def self.validate(expected_schema, datum)
-      return true if validate_strictly(expected_schema, datum)
+    def self.validate(expected_schema, datum, validator_method = :validate)
+      return true if validate_strictly(expected_schema, datum, validator_method)
       case expected_schema.type_sym
       when :float, :double
-        datum.is_a?(Float) || datum.is_a?(Fixnum) || datum.is_a?(Bignum)
+        datum.is_a?(Integer)
       else
         return false
       end
     end
 
     # Determine if a ruby datum is an instance of a schema
-    def self.validate_strictly(expected_schema, datum)
+    def self.validate_strictly(expected_schema, datum, validator_method = :validate_strictly)
       case expected_schema.type_sym
       when :null
         datum.nil?
@@ -112,11 +112,9 @@ module Tros
       when :string, :bytes
         datum.is_a? String
       when :int
-        (datum.is_a?(Fixnum) || datum.is_a?(Bignum)) &&
-            (INT_MIN_VALUE <= datum) && (datum <= INT_MAX_VALUE)
+        datum.is_a?(Integer) && (INT_MIN_VALUE <= datum) && (datum <= INT_MAX_VALUE)
       when :long
-        (datum.is_a?(Fixnum) || datum.is_a?(Bignum)) &&
-            (LONG_MIN_VALUE <= datum) && (datum <= LONG_MAX_VALUE)
+        datum.is_a?(Integer) && (LONG_MIN_VALUE <= datum) && (datum <= LONG_MAX_VALUE)
       when :float, :double
         datum.is_a?(Float)
       when :fixed
@@ -125,15 +123,15 @@ module Tros
         expected_schema.symbols.include? datum
       when :array
         datum.is_a?(Array) &&
-          datum.all?{|d| validate_strictly(expected_schema.items, d) }
+          datum.all?{|d| send(validator_method, expected_schema.items, d) }
       when :map
           datum.keys.all?{|k| k.is_a? String } &&
-          datum.values.all?{|v| validate_strictly(expected_schema.values, v) }
+          datum.values.all?{|v| send(validator_method, expected_schema.values, v) }
       when :union
-        expected_schema.schemas.any?{|s| validate_strictly(s, datum) }
+        expected_schema.schemas.any? { |s| send(validator_method, s, datum) }
       when :record, :error, :request
         datum.is_a?(Hash) &&
-          expected_schema.fields.all?{|f| validate_strictly(f.type, datum[f.name]) }
+          expected_schema.fields.all? { |f| send(validator_method, f.type, datum[f.name]) }
       else
         raise TypeError, "#{expected_schema.inspect} is not recognized as type."
       end
@@ -347,9 +345,7 @@ module Tros
       attr_reader :size
       def initialize(name, space, size, names=nil)
         # Ensure valid cto args
-        unless size.is_a?(Fixnum) || size.is_a?(Bignum)
-          raise AvroError, 'Fixed Schema requires a valid integer for size property.'
-        end
+        raise AvroError, 'Fixed Schema requires a valid integer for size property.' unless size.is_a?(Integer)
         super(:fixed, name, space, names)
         @size = size
       end
