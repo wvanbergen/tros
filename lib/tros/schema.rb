@@ -93,18 +93,21 @@ module Tros
 
     # Determine if a ruby datum is an instance of a schema
     def self.validate(expected_schema, datum, validator_method = :validate)
-      return true if validate_strictly(expected_schema, datum, validator_method)
-      case expected_schema.type_sym
-      when :float, :double
-        datum.is_a?(Integer)
-      else
-        return false
+      begin
+        return validate_strictly(expected_schema, datum, validator_method)
+      rescue Tros::AvroTypeError => e
+        case expected_schema.type_sym
+        when :float, :double
+          datum.is_a?(Integer)
+        else
+          raise e
+        end  
       end
     end
 
     # Determine if a ruby datum is an instance of a schema
     def self.validate_strictly(expected_schema, datum, validator_method = :validate_strictly)
-      case expected_schema.type_sym
+      value = case expected_schema.type_sym
       when :null
         datum.nil?
       when :boolean
@@ -135,6 +138,7 @@ module Tros
       else
         raise TypeError, "#{expected_schema.inspect} is not recognized as type."
       end
+      value ? value : raise(Tros::AvroTypeError.new(expected_schema, datum))
     end
 
     def initialize(type)

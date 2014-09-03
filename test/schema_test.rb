@@ -132,4 +132,24 @@ class SchemaTest < Minitest::Test
       ]
     }
   end
+
+  def test_validation_does_not_raise_for_valid_input
+    assert Tros::Schema.validate(example_schema, { "field1" => 1 })
+  end
+
+  def test_validation_raise_for_invalid_input
+    assert_raises(Tros::AvroTypeError) do
+      Tros::Schema.validate(example_schema, { "field1" => "x" })
+    end
+  end
+
+  private
+  def example_schema
+    Tros::Schema.parse <<-SCHEMA
+    {"type": "record", "name": "OuterRecord", "fields": [
+        { "name": "field1", "type": "int" }
+      ]}
+        
+    SCHEMA
+  end
 end
