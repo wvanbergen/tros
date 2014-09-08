@@ -96,7 +96,7 @@ module Tros
       return true if validate_strictly(expected_schema, datum, validator_method)
       case expected_schema.type_sym
       when :float, :double
-        datum.is_a?(Integer)
+        datum.is_a?(Numeric)
       else
         return false
       end
@@ -116,7 +116,7 @@ module Tros
       when :long
         datum.is_a?(Integer) && (LONG_MIN_VALUE <= datum) && (datum <= LONG_MAX_VALUE)
       when :float, :double
-        datum.is_a?(Float)
+        datum.is_a?(Float) || datum.is_a?(BigDecimal)
       when :fixed
         datum.is_a?(String) && datum.size == expected_schema.size
       when :enum
