@@ -91,7 +91,7 @@ module Tros
       end
     end
 
-    # Determine if a ruby datum is an instance of a schema
+    # Determine if a ruby datum can be coerced into a schema
     def self.validate(expected_schema, datum, validator_method = :validate)
       return true if validate_strictly(expected_schema, datum, validator_method)
       case expected_schema.type_sym
@@ -110,7 +110,7 @@ module Tros
       when :boolean
         datum == true || datum == false
       when :string, :bytes
-        datum.is_a? String
+        datum.is_a?(String)
       when :int
         datum.is_a?(Integer) && (INT_MIN_VALUE <= datum) && (datum <= INT_MAX_VALUE)
       when :long
@@ -120,13 +120,13 @@ module Tros
       when :fixed
         datum.is_a?(String) && datum.size == expected_schema.size
       when :enum
-        expected_schema.symbols.include? datum
+        expected_schema.symbols.include?(datum)
       when :array
         datum.is_a?(Array) &&
-          datum.all?{|d| send(validator_method, expected_schema.items, d) }
+          datum.all? { |d| send(validator_method, expected_schema.items, d) }
       when :map
-          datum.keys.all?{|k| k.is_a? String } &&
-          datum.values.all?{|v| send(validator_method, expected_schema.values, v) }
+        datum.keys.all? { |k| k.is_a?(String) } &&
+          datum.values.all? { |v| send(validator_method, expected_schema.values, v) }
       when :union
         expected_schema.schemas.any? { |s| send(validator_method, s, datum) }
       when :record, :error, :request
