@@ -204,6 +204,8 @@ module Tros
       attr_reader :fields
 
       def self.make_field_objects(field_data, names, namespace=nil)
+        raise SchemaParseError, "Record Schema requires a fields array" if field_data.nil?
+
         field_objects, field_names = [], Set.new
         field_data.each_with_index do |field, i|
           if field.respond_to?(:[]) # TODO(jmhodges) wtffffff
