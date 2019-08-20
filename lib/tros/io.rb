@@ -600,7 +600,7 @@ module Tros
 
       def write_record(writers_schema, datum, encoder)
         writers_schema.fields.each do |field|
-          write_data(field.type, datum[field.name], encoder)
+          write_data(field.type, (if datum[field.name].nil? then field.default else datum[field.name] end), encoder)
         end
       end
     end # DatumWriter
