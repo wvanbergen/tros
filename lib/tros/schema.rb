@@ -131,7 +131,7 @@ module Tros
         expected_schema.schemas.any? { |s| send(validator_method, s, datum) }
       when :record, :error, :request
         datum.is_a?(Hash) &&
-          expected_schema.fields.all? { |f| send(validator_method, f.type, datum[f.name]) }
+          expected_schema.fields.all? { |f| send(validator_method, f.type, (if datum[f.name].nil? then f.default else datum[f.name] end)) }
       else
         raise TypeError, "#{expected_schema.inspect} is not recognized as type."
       end
